@@ -80,3 +80,10 @@ wikilink:
   auto_top_k: 8
   min_keyword_len: 2
   exclude_keywords: []
+
+# --- Embedding / 向量化配置 ---
+embedding:
+  api_key: "${GEMINI_API_KEY}"
+  base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
+  model: "gemini-embedding-001"
+  enabled: true

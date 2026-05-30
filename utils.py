@@ -68,7 +68,7 @@ def load_config(config_path: str = None) -> dict:
             with open(config_path, "r", encoding="utf-8") as f:
                 file_config = yaml.safe_load(f) or {}
             if isinstance(file_config, dict):
-                config = _deep_merge(defaults, file_config)
+                config = _deep_merge(defaults, _expand_env_vars(file_config))
             else:
                 logging.warning(
                     f"Config file is not a valid YAML dict, using defaults / "
@@ -109,6 +109,17 @@ def load_config(config_path: str = None) -> dict:
         os.makedirs(os.path.join(buckets_dir, subdir), exist_ok=True)
 
     return config
+
+
+def _expand_env_vars(obj):
+    """Recursively expand ${VAR} patterns in config string values."""
+    if isinstance(obj, str):
+        return re.sub(r'\$\{([^}]+)\}', lambda m: os.environ.get(m.group(1), m.group(0)), obj)
+    if isinstance(obj, dict):
+        return {k: _expand_env_vars(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_expand_env_vars(i) for i in obj]
+    return obj
 
 
 def _deep_merge(base: dict, override: dict) -> dict:
